@@ -25,22 +25,101 @@ const EUROPEAN_CITIES = [
     { name: "Zurich", country: "Switzerland", lat: 47.3769, lon: 8.5417 }
 ];
 
-// Weather code mapping for 7Timer API
+// Weather code mapping for 7Timer API with category grouping
 const WEATHER_CODES = {
-    'clear': { description: 'Clear Sky', icon: 'fas fa-sun', color: '#f9c74f' },
-    'pcloudy': { description: 'Partly Cloudy', icon: 'fas fa-cloud-sun', color: '#f8961e' },
-    'mcloudy': { description: 'Mostly Cloudy', icon: 'fas fa-cloud', color: '#adb5bd' },
-    'cloudy': { description: 'Cloudy', icon: 'fas fa-cloud', color: '#6d6875' },
-    'humid': { description: 'Foggy', icon: 'fas fa-smog', color: '#dee2e6' },
-    'lightrain': { description: 'Light Rain', icon: 'fas fa-cloud-rain', color: '#90be6d' },
-    'oshower': { description: 'Occasional Showers', icon: 'fas fa-cloud-showers-heavy', color: '#43aa8b' },
-    'ishower': { description: 'Isolated Showers', icon: 'fas fa-cloud-sun-rain', color: '#4d908e' },
-    'lightsnow': { description: 'Light Snow', icon: 'fas fa-snowflake', color: '#c7f9cc' },
-    'rain': { description: 'Rain', icon: 'fas fa-cloud-showers-heavy', color: '#277da1' },
-    'snow': { description: 'Snow', icon: 'fas fa-snowflake', color: '#f8f9fa' },
-    'rainsnow': { description: 'Rain and Snow', icon: 'fas fa-cloud-meatball', color: '#577590' },
-    'ts': { description: 'Thunderstorm', icon: 'fas fa-bolt', color: '#f94144' },
-    'tsrain': { description: 'Thunderstorm with Rain', icon: 'fas fa-poo-storm', color: '#f3722c' }
+    // Sunny/Clear weather - warm colors
+    'clear': { 
+        description: 'Clear Sky', 
+        icon: 'fas fa-sun', 
+        color: '#f9c74f',
+        cardClass: 'weather-sunny'
+    },
+    'pcloudy': { 
+        description: 'Partly Cloudy', 
+        icon: 'fas fa-cloud-sun', 
+        color: '#f8961e',
+        cardClass: 'weather-partly-cloudy'
+    },
+    
+    // Cloudy weather - cool/neutral colors
+    'mcloudy': { 
+        description: 'Mostly Cloudy', 
+        icon: 'fas fa-cloud', 
+        color: '#adb5bd',
+        cardClass: 'weather-cloudy'
+    },
+    'cloudy': { 
+        description: 'Cloudy', 
+        icon: 'fas fa-cloud', 
+        color: '#6d6875',
+        cardClass: 'weather-cloudy'
+    },
+    'humid': { 
+        description: 'Foggy', 
+        icon: 'fas fa-smog', 
+        color: '#dee2e6',
+        cardClass: 'weather-foggy'
+    },
+    
+    // Rain weather - blue colors
+    'lightrain': { 
+        description: 'Light Rain', 
+        icon: 'fas fa-cloud-rain', 
+        color: '#90be6d',
+        cardClass: 'weather-rain'
+    },
+    'oshower': { 
+        description: 'Occasional Showers', 
+        icon: 'fas fa-cloud-showers-heavy', 
+        color: '#43aa8b',
+        cardClass: 'weather-rain'
+    },
+    'ishower': { 
+        description: 'Isolated Showers', 
+        icon: 'fas fa-cloud-sun-rain', 
+        color: '#4d908e',
+        cardClass: 'weather-rain'
+    },
+    'rain': { 
+        description: 'Rain', 
+        icon: 'fas fa-cloud-showers-heavy', 
+        color: '#277da1',
+        cardClass: 'weather-rain'
+    },
+    
+    // Snow weather - light blue/white colors
+    'lightsnow': { 
+        description: 'Light Snow', 
+        icon: 'fas fa-snowflake', 
+        color: '#c7f9cc',
+        cardClass: 'weather-snow'
+    },
+    'snow': { 
+        description: 'Snow', 
+        icon: 'fas fa-snowflake', 
+        color: '#f8f9fa',
+        cardClass: 'weather-snow'
+    },
+    'rainsnow': { 
+        description: 'Rain and Snow', 
+        icon: 'fas fa-cloud-meatball', 
+        color: '#577590',
+        cardClass: 'weather-snow-rain'
+    },
+    
+    // Storm weather - dark colors
+    'ts': { 
+        description: 'Thunderstorm', 
+        icon: 'fas fa-bolt', 
+        color: '#f94144',
+        cardClass: 'weather-thunder'
+    },
+    'tsrain': { 
+        description: 'Thunderstorm with Rain', 
+        icon: 'fas fa-poo-storm', 
+        color: '#f3722c',
+        cardClass: 'weather-thunder'
+    }
 };
 
 // Travel tips based on weather
@@ -109,10 +188,11 @@ function formatTemp(temp) {
 
 // Create a forecast card element
 function createForecastCard(date, weather, maxTemp, minTemp, index) {
-    const weatherInfo = WEATHER_CODES[weather.toLowerCase()] || WEATHER_CODES.cloudy;
+    const weatherCode = weather.toLowerCase();
+    const weatherInfo = WEATHER_CODES[weatherCode] || WEATHER_CODES.cloudy;
     
     const card = document.createElement('div');
-    card.className = 'forecast-card';
+    card.className = `forecast-card ${weatherInfo.cardClass}`;
     card.style.animationDelay = `${index * 0.1}s`;
     
     card.innerHTML = `
@@ -270,6 +350,12 @@ function toggleTemperatureUnit() {
 
 // Populate city dropdown
 function populateCityDropdown() {
+    // Clear existing options first (except the placeholder)
+    while (citySelect.options.length > 1) {
+        citySelect.remove(1);
+    }
+    
+    // Add new options
     EUROPEAN_CITIES.sort((a, b) => a.name.localeCompare(b.name)).forEach(city => {
         const option = document.createElement('option');
         option.value = city.name;
@@ -299,26 +385,42 @@ function loadSavedPreferences() {
     }
 }
 
-// Set up event listeners
-function setupEventListeners() {
-    // City select change event
-    citySelect.addEventListener('change', () => {
-        if (citySelect.value && !isLoading) {
-            fetchWeather(citySelect.value);
-        }
+// Fix for Android select issue
+function fixAndroidSelect() {
+    // Use click instead of change for better mobile compatibility
+    citySelect.addEventListener('click', function() {
+        // Ensure the dropdown fully opens on Android
+        this.blur();
+        this.focus();
     });
     
+    // Also handle change event
+    citySelect.addEventListener('change', function() {
+        if (this.value && !isLoading) {
+            fetchWeather(this.value);
+        }
+    });
+}
+
+// Set up event listeners
+function setupEventListeners() {
     // Temperature unit toggle event
     unitToggleBtn.addEventListener('click', toggleTemperatureUnit);
     
-    // Popular city buttons
+    // Popular city buttons with better mobile handling
     cityButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            if (isLoading) return;
-            
-            const city = button.getAttribute('data-city');
-            citySelect.value = city;
-            fetchWeather(city);
+        ['click', 'touchend'].forEach(eventType => {
+            button.addEventListener(eventType, (e) => {
+                if (eventType === 'touchend') {
+                    e.preventDefault(); // Prevent default for touch
+                }
+                
+                if (isLoading) return;
+                
+                const city = button.getAttribute('data-city');
+                citySelect.value = city;
+                fetchWeather(city);
+            });
         });
     });
 }
@@ -328,7 +430,9 @@ function initApp() {
     // Create loading overlay
     getLoadingOverlay();
     
+    // Set up the app
     populateCityDropdown();
+    fixAndroidSelect();
     setupEventListeners();
     loadSavedPreferences();
 }
