@@ -299,16 +299,6 @@ function loadSavedPreferences() {
     }
 }
 
-// Debounce function to prevent multiple rapid executions
-function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        const context = this;
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(context, args), wait);
-    };
-}
-
 // Set up event listeners
 function setupEventListeners() {
     // City select change event
@@ -331,16 +321,6 @@ function setupEventListeners() {
             fetchWeather(city);
         });
     });
-    
-    // Handle window resize for forecast container
-    window.addEventListener('resize', debounce(() => {
-        if (currentForecast) {
-            displayForecast(currentForecast);
-        }
-    }, 250));
-    
-    // Fix iOS overscroll issues with forecast container
-    forecastContainer.addEventListener('touchstart', () => {}, { passive: true });
 }
 
 // Initialize application
