@@ -76,6 +76,7 @@ let currentCity = null;
 let currentForecast = null;
 let fetchController = null;
 let isLoading = false;
+let touchStartY = 0; // To detect vertical swipes
 
 // Format date from 7Timer API (YYYYMMDD)
 function formatDate(dateString) {
@@ -309,6 +310,16 @@ function debounce(func, wait) {
     };
 }
 
+// Prevent default behavior for touchmove events
+function preventPullToRefresh(e) {
+    const touchY = e.touches[0].clientY;
+    
+    // If we're at the top of the page and trying to pull down, prevent default
+    if (window.scrollY === 0 && touchY > touchStartY) {
+        e.preventDefault();
+    }
+}
+
 // Set up event listeners
 function setupEventListeners() {
     // City select change event
@@ -338,12 +349,33 @@ function setupEventListeners() {
             displayForecast(currentForecast);
         }
     }, 250));
+    
+    // Prevent pull-to-refresh on mobile
+    document.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
+    
+    // Fix iOS overscroll issues with forecast container
+    forecastContainer.addEventListener('touchstart', () => {}, { passive: true });
+    
+    // Prevent zooming on double tap for mobile (except on inputs)
+    document.addEventListener('dblclick', (e) => {
+        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+            e.preventDefault();
+        }
+    });
 }
 
 // Initialize application
 function initApp() {
     // Create loading overlay
     getLoadingOverlay();
+    
+    // Prevent iOS rubber-band effect
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'auto';
     
     populateCityDropdown();
     setupEventListeners();
