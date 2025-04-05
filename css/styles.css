@@ -6,13 +6,13 @@
 }
 
 :root {
-  --primary-color: #2962ff;
-  --secondary-color: #0039cb;
-  --accent-color: #ffab00;
-  --text-light: #ffffff;
-  --text-dark: #333333;
-  --card-bg: #ffffff;
-  --app-bg: linear-gradient(135deg, #2962ff 0%, #0039cb 100%);
+  --primary-color: #e07a5f;
+  --secondary-color: #f2cc8f;
+  --accent-color: #81b29a;
+  --text-light: #f4f1de;
+  --text-dark: #3d405b;
+  --card-bg: #f4f1de;
+  --app-bg: linear-gradient(135deg, #3d405b 0%, #6d597a 100%);
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   --border-radius: 12px;
@@ -29,7 +29,7 @@ body {
 }
 
 .app-container {
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -44,7 +44,7 @@ body {
 .app-header h1 {
   font-size: 2.5rem;
   font-weight: 700;
-  color: var(--text-light);
+  color: var(--secondary-color);
   margin-bottom: 5px;
   letter-spacing: 1px;
 }
@@ -102,7 +102,7 @@ body {
 }
 
 #unit-toggle-btn:hover {
-  background-color: #f9a825;
+  background-color: #6d9e84;
   transform: translateY(-2px);
 }
 
@@ -145,7 +145,7 @@ body {
 
 .travel-tip i {
   font-size: 1.3rem;
-  color: var(--accent-color);
+  color: var(--secondary-color);
 }
 
 #tip-text {
@@ -155,10 +155,13 @@ body {
 
 /* Forecast Container */
 .forecast-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  display: flex;
+  justify-content: space-between;
   gap: 15px;
   margin-bottom: 30px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scroll-behavior: smooth;
 }
 
 .forecast-card {
@@ -172,6 +175,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 140px;
+  flex: 1;
 }
 
 .forecast-card:hover {
@@ -201,12 +206,12 @@ body {
 }
 
 .temperature.high {
-  color: #f44336;
+  color: #e07a5f;
   font-weight: 600;
 }
 
 .temperature.low {
-  color: #2196f3;
+  color: #81b29a;
 }
 
 /* Popular Cities */
@@ -240,7 +245,7 @@ body {
 }
 
 .city-btn:hover {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: var(--primary-color);
   transform: translateY(-2px);
 }
 
@@ -270,6 +275,12 @@ body {
 .forecast-card:nth-child(7) { animation-delay: 0.7s; }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+  .forecast-container {
+    justify-content: flex-start;
+  }
+}
+
 @media (max-width: 768px) {
   .app-header h1 {
     font-size: 2rem;
@@ -284,10 +295,6 @@ body {
     min-width: auto;
   }
   
-  .forecast-container {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  }
-  
   .current-weather {
     flex-direction: column;
     gap: 10px;
@@ -298,11 +305,6 @@ body {
 @media (max-width: 480px) {
   .app-container {
     padding: 15px;
-  }
-  
-  .forecast-container {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 10px;
   }
   
   .forecast-card {
@@ -329,7 +331,7 @@ body {
   height: 40px;
   border: 4px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
-  border-top-color: var(--text-light);
+  border-top-color: var(--secondary-color);
   animation: spin 1s linear infinite;
 }
 
@@ -337,11 +339,34 @@ body {
   to { transform: rotate(360deg); }
 }
 
+/* Loading overlay for city changes */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.loading-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
 /* Error States */
 .error {
   text-align: center;
   padding: 20px;
-  background-color: rgba(244, 67, 54, 0.1);
+  background-color: rgba(224, 122, 95, 0.2);
   border-radius: var(--border-radius);
   margin: 20px 0;
 }
