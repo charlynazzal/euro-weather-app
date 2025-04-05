@@ -1,6 +1,4 @@
-# EuroWeather - European Travel Weather Forecast
-
-![EuroWeather Banner](https://source.unsplash.com/featured/?europe,weather/1200x400)
+# EuroWeather - European Weather Forecast
 
 EuroWeather is a responsive web application that provides 7-day weather forecasts for major European cities, helping travelers plan their trips more effectively. The app features a clean, modern interface focused on usability and functionality.
 
