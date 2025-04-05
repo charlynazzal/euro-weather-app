@@ -83,6 +83,7 @@ h1 i {
 /* City selection */
 .search-container {
     margin-bottom: 15px;
+    position: relative;
 }
 
 .city-select {
@@ -97,6 +98,76 @@ h1 i {
     background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
     background-repeat: no-repeat;
     background-position: right 12px center;
+}
+
+/* Custom dropdown for mobile */
+.custom-dropdown {
+    width: 100%;
+    position: relative;
+    z-index: 100;
+}
+
+.selected-city {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--card-background);
+    box-shadow: var(--shadow);
+    position: relative;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.selected-city::after {
+    content: "";
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid var(--text-color);
+    transition: transform 0.3s;
+}
+
+.custom-dropdown.open .selected-city::after {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.cities-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    box-shadow: var(--shadow);
+    max-height: 0;
+    overflow-y: auto;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.custom-dropdown.open .cities-list {
+    max-height: 250px;
+    opacity: 1;
+    pointer-events: all;
+    padding: 8px 0;
+}
+
+.city-option {
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.city-option:hover {
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 /* Popular cities */
@@ -133,6 +204,7 @@ h1 i {
     color: white;
     margin-bottom: 20px;
     box-shadow: var(--shadow);
+    transition: background 0.5s ease;
 }
 
 .current-weather h2 {
@@ -429,13 +501,15 @@ footer a:hover {
         padding: 12px 15px;
     }
     
-    .city-select {
-        height: 48px; /* Better touch target */
+    /* Custom dropdown styles for mobile */
+    .selected-city {
+        height: 48px;
+        display: flex;
+        align-items: center;
     }
     
-    /* Fix for Android select elements */
-    select:focus {
-        outline: none;
+    .city-option {
+        padding: 12px 16px;
     }
 }
 
@@ -443,13 +517,15 @@ footer a:hover {
 @media (max-width: 480px) {
     select.city-select {
         font-size: 16px; /* Prevents zoom on focus in iOS */
-        -webkit-appearance: menulist; /* Force native appearance on mobile */
-        appearance: menulist;
-        background-image: none;
     }
     
     .popular-cities {
         justify-content: center;
+    }
+    
+    /* Ensure dropdown doesn't get cut off */
+    .custom-dropdown.open .cities-list {
+        max-height: 60vh;
     }
 }
 
