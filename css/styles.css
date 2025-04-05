@@ -6,12 +6,8 @@
 }
 
 html, body {
-  /* Better scroll behavior */
-  overscroll-behavior: none;
-  /* Smooth scrolling on iOS */
-  -webkit-overflow-scrolling: touch;
-  /* Ensure proper height */
   height: 100%;
+  width: 100%;
 }
 
 :root {
@@ -32,20 +28,15 @@ body {
   background: var(--app-bg);
   color: var(--text-light);
   line-height: 1.6;
-  min-height: 100vh;
-  padding: 0;
-  margin: 0;
-  /* Allow normal scrolling */
-  position: relative;
-  width: 100%;
+  /* Simple setup for better scrolling */
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .app-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
-  /* Prevent content from being cut off */
   padding-bottom: 80px;
 }
 
@@ -91,8 +82,6 @@ body {
   box-shadow: var(--shadow);
   cursor: pointer;
   transition: all 0.3s ease;
-  /* Enable text selection for dropdown */
-  user-select: text;
 }
 
 #city-select:focus {
@@ -116,7 +105,6 @@ body {
   font-weight: 600;
   font-family: inherit;
   box-shadow: var(--shadow);
-  /* Make button larger on mobile for better touch targets */
   min-width: 44px;
   min-height: 44px;
 }
@@ -182,28 +170,7 @@ body {
   overflow-x: auto;
   padding-bottom: 10px;
   scroll-behavior: smooth;
-  /* Fix iOS momentum scrolling */
   -webkit-overflow-scrolling: touch;
-  /* Prevent triggering unwanted refresh */
-  overscroll-behavior-x: contain;
-  /* Add padding to make space for scrollbar */
-  padding-right: 5px;
-  /* Show scrollbar differently based on platform */
-  scrollbar-width: thin;
-  scrollbar-color: var(--primary-color) transparent;
-}
-
-.forecast-container::-webkit-scrollbar {
-  height: 6px;
-}
-
-.forecast-container::-webkit-scrollbar-thumb {
-  background-color: var(--primary-color);
-  border-radius: 10px;
-}
-
-.forecast-container::-webkit-scrollbar-track {
-  background: transparent;
 }
 
 .forecast-card {
@@ -219,9 +186,7 @@ body {
   gap: 8px;
   min-width: 140px;
   flex: 1;
-  /* Prevent card width issues */
   flex-shrink: 0;
-  /* No grow beyond content */
   flex-grow: 0;
 }
 
@@ -288,7 +253,6 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
-  /* Make buttons larger on mobile for better touch targets */
   min-height: 44px;
   min-width: 70px;
 }
@@ -369,7 +333,6 @@ body {
     margin: 5px 0;
   }
   
-  /* Improve touch targets on mobile */
   .city-btn {
     padding: 12px 15px;
   }
