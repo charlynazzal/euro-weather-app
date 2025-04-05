@@ -27,20 +27,20 @@ const EUROPEAN_CITIES = [
 
 // Weather code mapping for 7Timer API
 const WEATHER_CODES = {
-    'clear': { description: 'Clear Sky', icon: 'fas fa-sun', color: '#FFD700' },
-    'pcloudy': { description: 'Partly Cloudy', icon: 'fas fa-cloud-sun', color: '#87CEEB' },
-    'mcloudy': { description: 'Mostly Cloudy', icon: 'fas fa-cloud', color: '#B0C4DE' },
-    'cloudy': { description: 'Cloudy', icon: 'fas fa-cloud', color: '#778899' },
-    'humid': { description: 'Foggy', icon: 'fas fa-smog', color: '#D3D3D3' },
-    'lightrain': { description: 'Light Rain', icon: 'fas fa-cloud-rain', color: '#4682B4' },
-    'oshower': { description: 'Occasional Showers', icon: 'fas fa-cloud-showers-heavy', color: '#4169E1' },
-    'ishower': { description: 'Isolated Showers', icon: 'fas fa-cloud-sun-rain', color: '#6495ED' },
-    'lightsnow': { description: 'Light Snow', icon: 'fas fa-snowflake', color: '#B0E0E6' },
-    'rain': { description: 'Rain', icon: 'fas fa-cloud-showers-heavy', color: '#0000CD' },
-    'snow': { description: 'Snow', icon: 'fas fa-snowflake', color: '#F0F8FF' },
-    'rainsnow': { description: 'Rain and Snow', icon: 'fas fa-cloud-meatball', color: '#B0C4DE' },
-    'ts': { description: 'Thunderstorm', icon: 'fas fa-bolt', color: '#4B0082' },
-    'tsrain': { description: 'Thunderstorm with Rain', icon: 'fas fa-poo-storm', color: '#191970' }
+    'clear': { description: 'Clear Sky', icon: 'fas fa-sun', color: '#f9c74f' },
+    'pcloudy': { description: 'Partly Cloudy', icon: 'fas fa-cloud-sun', color: '#f8961e' },
+    'mcloudy': { description: 'Mostly Cloudy', icon: 'fas fa-cloud', color: '#adb5bd' },
+    'cloudy': { description: 'Cloudy', icon: 'fas fa-cloud', color: '#6d6875' },
+    'humid': { description: 'Foggy', icon: 'fas fa-smog', color: '#dee2e6' },
+    'lightrain': { description: 'Light Rain', icon: 'fas fa-cloud-rain', color: '#90be6d' },
+    'oshower': { description: 'Occasional Showers', icon: 'fas fa-cloud-showers-heavy', color: '#43aa8b' },
+    'ishower': { description: 'Isolated Showers', icon: 'fas fa-cloud-sun-rain', color: '#4d908e' },
+    'lightsnow': { description: 'Light Snow', icon: 'fas fa-snowflake', color: '#c7f9cc' },
+    'rain': { description: 'Rain', icon: 'fas fa-cloud-showers-heavy', color: '#277da1' },
+    'snow': { description: 'Snow', icon: 'fas fa-snowflake', color: '#f8f9fa' },
+    'rainsnow': { description: 'Rain and Snow', icon: 'fas fa-cloud-meatball', color: '#577590' },
+    'ts': { description: 'Thunderstorm', icon: 'fas fa-bolt', color: '#f94144' },
+    'tsrain': { description: 'Thunderstorm with Rain', icon: 'fas fa-poo-storm', color: '#f3722c' }
 };
 
 // Travel tips based on weather
@@ -74,6 +74,8 @@ const cityButtons = document.querySelectorAll('.city-btn');
 let useCelsius = true;
 let currentCity = null;
 let currentForecast = null;
+let fetchController = null;
+let isLoading = false;
 
 // Format date from 7Timer API (YYYYMMDD)
 function formatDate(dateString) {
@@ -124,9 +126,52 @@ function createForecastCard(date, weather, maxTemp, minTemp, index) {
     return card;
 }
 
+// Create/get loading overlay
+function getLoadingOverlay() {
+    let overlay = document.querySelector('.loading-overlay');
+    
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'loading-overlay';
+        overlay.innerHTML = '<div class="loading"></div>';
+        document.body.appendChild(overlay);
+    }
+    
+    return overlay;
+}
+
+// Show loading state
+function showLoading() {
+    isLoading = true;
+    const overlay = getLoadingOverlay();
+    overlay.classList.add('active');
+    
+    // Clear previous content immediately
+    forecastContainer.innerHTML = '';
+    cityInfo.textContent = 'Loading...';
+    currentTemp.textContent = '';
+    tipText.textContent = '';
+}
+
+// Hide loading state
+function hideLoading() {
+    isLoading = false;
+    const overlay = getLoadingOverlay();
+    overlay.classList.remove('active');
+}
+
 // Fetch weather forecast
 async function fetchWeather(cityName) {
-    forecastContainer.innerHTML = '<div class="loading"></div>';
+    // Cancel any ongoing fetch
+    if (fetchController) {
+        fetchController.abort();
+    }
+    
+    // Create new abort controller
+    fetchController = new AbortController();
+    const signal = fetchController.signal;
+    
+    showLoading();
     
     try {
         const city = EUROPEAN_CITIES.find(c => c.name.toLowerCase() === cityName.toLowerCase());
@@ -136,7 +181,8 @@ async function fetchWeather(cityName) {
         
         currentCity = city;
         const url = `https://www.7timer.info/bin/api.pl?lon=${city.lon}&lat=${city.lat}&product=civillight&output=json`;
-        const response = await fetch(url);
+        
+        const response = await fetch(url, { signal });
         
         if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -144,6 +190,8 @@ async function fetchWeather(cityName) {
         
         const data = await response.json();
         currentForecast = data.dataseries;
+        
+        // Update UI with fetched data
         displayForecast(data.dataseries);
         updateCurrentWeather(city, data.dataseries[0]);
         updateTravelTip(data.dataseries[0].weather);
@@ -151,19 +199,28 @@ async function fetchWeather(cityName) {
         // Save last selected city to localStorage
         localStorage.setItem('lastCity', cityName);
     } catch (error) {
-        console.error('Error fetching weather data:', error);
-        forecastContainer.innerHTML = `
-            <div class="error">
-                <p>Failed to load weather data. Please try again later.</p>
-                <p>Error: ${error.message}</p>
-            </div>
-        `;
+        if (error.name === 'AbortError') {
+            console.log('Fetch aborted');
+        } else {
+            console.error('Error fetching weather data:', error);
+            forecastContainer.innerHTML = `
+                <div class="error">
+                    <p>Failed to load weather data. Please try again later.</p>
+                    <p>Error: ${error.message}</p>
+                </div>
+            `;
+        }
+    } finally {
+        hideLoading();
     }
 }
 
 // Display the 7-day forecast
 function displayForecast(forecastData) {
     forecastContainer.innerHTML = '';
+    
+    // Create all cards first, then append at once for better performance
+    const fragment = document.createDocumentFragment();
     
     for (let i = 0; i < 7 && i < forecastData.length; i++) {
         const day = forecastData[i];
@@ -175,8 +232,10 @@ function displayForecast(forecastData) {
             i
         );
         
-        forecastContainer.appendChild(card);
+        fragment.appendChild(card);
     }
+    
+    forecastContainer.appendChild(fragment);
 }
 
 // Update current weather display
@@ -240,11 +299,21 @@ function loadSavedPreferences() {
     }
 }
 
+// Debounce function to prevent multiple rapid executions
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+}
+
 // Set up event listeners
 function setupEventListeners() {
     // City select change event
     citySelect.addEventListener('change', () => {
-        if (citySelect.value) {
+        if (citySelect.value && !isLoading) {
             fetchWeather(citySelect.value);
         }
     });
@@ -255,15 +324,27 @@ function setupEventListeners() {
     // Popular city buttons
     cityButtons.forEach(button => {
         button.addEventListener('click', () => {
+            if (isLoading) return;
+            
             const city = button.getAttribute('data-city');
             citySelect.value = city;
             fetchWeather(city);
         });
     });
+    
+    // Handle window resize for forecast container
+    window.addEventListener('resize', debounce(() => {
+        if (currentForecast) {
+            displayForecast(currentForecast);
+        }
+    }, 250));
 }
 
 // Initialize application
 function initApp() {
+    // Create loading overlay
+    getLoadingOverlay();
+    
     populateCityDropdown();
     setupEventListeners();
     loadSavedPreferences();
