@@ -32,13 +32,15 @@ const WEATHER_CODES = {
         description: 'Clear Sky', 
         icon: 'fas fa-sun', 
         color: '#f9c74f',
-        cardClass: 'weather-sunny'
+        cardClass: 'weather-sunny',
+        gradient: 'linear-gradient(135deg, #ff9a00, #ffcb00)'
     },
     'pcloudy': { 
         description: 'Partly Cloudy', 
         icon: 'fas fa-cloud-sun', 
         color: '#f8961e',
-        cardClass: 'weather-partly-cloudy'
+        cardClass: 'weather-partly-cloudy',
+        gradient: 'linear-gradient(135deg, #ffb347, #ffcc33)'
     },
     
     // Cloudy weather - cool/neutral colors
@@ -46,19 +48,22 @@ const WEATHER_CODES = {
         description: 'Mostly Cloudy', 
         icon: 'fas fa-cloud', 
         color: '#adb5bd',
-        cardClass: 'weather-cloudy'
+        cardClass: 'weather-cloudy',
+        gradient: 'linear-gradient(135deg, #8d99ae, #b8bedd)'
     },
     'cloudy': { 
         description: 'Cloudy', 
         icon: 'fas fa-cloud', 
         color: '#6d6875',
-        cardClass: 'weather-cloudy'
+        cardClass: 'weather-cloudy',
+        gradient: 'linear-gradient(135deg, #6c757d, #adb5bd)'
     },
     'humid': { 
         description: 'Foggy', 
         icon: 'fas fa-smog', 
         color: '#dee2e6',
-        cardClass: 'weather-foggy'
+        cardClass: 'weather-foggy',
+        gradient: 'linear-gradient(135deg, #ced4da, #e9ecef)'
     },
     
     // Rain weather - blue colors
@@ -66,25 +71,29 @@ const WEATHER_CODES = {
         description: 'Light Rain', 
         icon: 'fas fa-cloud-rain', 
         color: '#90be6d',
-        cardClass: 'weather-rain'
+        cardClass: 'weather-rain',
+        gradient: 'linear-gradient(135deg, #48cae4, #90e0ef)'
     },
     'oshower': { 
         description: 'Occasional Showers', 
         icon: 'fas fa-cloud-showers-heavy', 
         color: '#43aa8b',
-        cardClass: 'weather-rain'
+        cardClass: 'weather-rain',
+        gradient: 'linear-gradient(135deg, #0096c7, #48cae4)'
     },
     'ishower': { 
         description: 'Isolated Showers', 
         icon: 'fas fa-cloud-sun-rain', 
         color: '#4d908e',
-        cardClass: 'weather-rain'
+        cardClass: 'weather-rain',
+        gradient: 'linear-gradient(135deg, #0077b6, #00b4d8)'
     },
     'rain': { 
         description: 'Rain', 
         icon: 'fas fa-cloud-showers-heavy', 
         color: '#277da1',
-        cardClass: 'weather-rain'
+        cardClass: 'weather-rain',
+        gradient: 'linear-gradient(135deg, #023e8a, #0096c7)'
     },
     
     // Snow weather - light blue/white colors
@@ -92,19 +101,22 @@ const WEATHER_CODES = {
         description: 'Light Snow', 
         icon: 'fas fa-snowflake', 
         color: '#c7f9cc',
-        cardClass: 'weather-snow'
+        cardClass: 'weather-snow',
+        gradient: 'linear-gradient(135deg, #caf0f8, #e0fbfc)'
     },
     'snow': { 
         description: 'Snow', 
         icon: 'fas fa-snowflake', 
         color: '#f8f9fa',
-        cardClass: 'weather-snow'
+        cardClass: 'weather-snow',
+        gradient: 'linear-gradient(135deg, #a9d6e5, #e0fbfc)'
     },
     'rainsnow': { 
         description: 'Rain and Snow', 
         icon: 'fas fa-cloud-meatball', 
         color: '#577590',
-        cardClass: 'weather-snow-rain'
+        cardClass: 'weather-snow-rain',
+        gradient: 'linear-gradient(135deg, #4895ef, #a9d6e5)'
     },
     
     // Storm weather - dark colors
@@ -112,13 +124,15 @@ const WEATHER_CODES = {
         description: 'Thunderstorm', 
         icon: 'fas fa-bolt', 
         color: '#f94144',
-        cardClass: 'weather-thunder'
+        cardClass: 'weather-thunder',
+        gradient: 'linear-gradient(135deg, #3a0ca3, #4361ee)'
     },
     'tsrain': { 
         description: 'Thunderstorm with Rain', 
         icon: 'fas fa-poo-storm', 
         color: '#f3722c',
-        cardClass: 'weather-thunder'
+        cardClass: 'weather-thunder',
+        gradient: 'linear-gradient(135deg, #5465ff, #788bff)'
     }
 };
 
@@ -148,6 +162,8 @@ const cityInfo = document.getElementById('city-info');
 const currentTemp = document.getElementById('current-temp');
 const tipText = document.getElementById('tip-text');
 const cityButtons = document.querySelectorAll('.city-btn');
+const currentWeatherBox = document.querySelector('.current-weather');
+const citySelectContainer = document.querySelector('.search-container');
 
 // App state
 let useCelsius = true;
@@ -204,6 +220,63 @@ function createForecastCard(date, weather, maxTemp, minTemp, index) {
     `;
     
     return card;
+}
+
+// Create city list for custom dropdown
+function createCustomCityDropdown() {
+    // Don't recreate if already exists
+    if (document.querySelector('.custom-dropdown')) return;
+
+    // Create custom dropdown container
+    const dropdownContainer = document.createElement('div');
+    dropdownContainer.className = 'custom-dropdown';
+    
+    // Create the selected display
+    const selectedDisplay = document.createElement('div');
+    selectedDisplay.className = 'selected-city';
+    selectedDisplay.textContent = 'Select a city';
+    
+    // Create cities list
+    const citiesList = document.createElement('div');
+    citiesList.className = 'cities-list';
+    
+    // Add cities to list
+    EUROPEAN_CITIES.sort((a, b) => a.name.localeCompare(b.name)).forEach(city => {
+        const cityOption = document.createElement('div');
+        cityOption.className = 'city-option';
+        cityOption.textContent = `${city.name}, ${city.country}`;
+        cityOption.dataset.city = city.name;
+        
+        cityOption.addEventListener('click', () => {
+            selectedDisplay.textContent = `${city.name}, ${city.country}`;
+            dropdownContainer.classList.remove('open');
+            if (!isLoading) {
+                fetchWeather(city.name);
+            }
+        });
+        
+        citiesList.appendChild(cityOption);
+    });
+    
+    // Add click handler to toggle dropdown
+    selectedDisplay.addEventListener('click', () => {
+        dropdownContainer.classList.toggle('open');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!dropdownContainer.contains(e.target)) {
+            dropdownContainer.classList.remove('open');
+        }
+    });
+    
+    // Assemble dropdown
+    dropdownContainer.appendChild(selectedDisplay);
+    dropdownContainer.appendChild(citiesList);
+    
+    // Replace select element with custom dropdown
+    citySelectContainer.innerHTML = '';
+    citySelectContainer.appendChild(dropdownContainer);
 }
 
 // Create/get loading overlay
@@ -278,6 +351,12 @@ async function fetchWeather(cityName) {
         
         // Save last selected city to localStorage
         localStorage.setItem('lastCity', cityName);
+        
+        // Update selected city in custom dropdown if exists
+        const selectedCity = document.querySelector('.selected-city');
+        if (selectedCity) {
+            selectedCity.textContent = `${city.name}, ${city.country}`;
+        }
     } catch (error) {
         if (error.name === 'AbortError') {
             console.log('Fetch aborted');
@@ -320,11 +399,20 @@ function displayForecast(forecastData) {
 
 // Update current weather display
 function updateCurrentWeather(city, todayData) {
+    // Get weather info for current weather
+    const weatherCode = todayData.weather.toLowerCase();
+    const weatherInfo = WEATHER_CODES[weatherCode] || WEATHER_CODES.cloudy;
+    
+    // Update current weather card background color to match weather
+    if (currentWeatherBox) {
+        currentWeatherBox.style.background = weatherInfo.gradient;
+    }
+    
     // Update city info
     cityInfo.textContent = `${city.name}, ${city.country} | ${formatDate(todayData.date.toString())}`;
     
     // Update current temperature
-    currentTemp.innerHTML = `${WEATHER_CODES[todayData.weather.toLowerCase()]?.description || 'Weather'} | High: ${formatTemp(todayData.temp2m.max)} | Low: ${formatTemp(todayData.temp2m.min)}`;
+    currentTemp.innerHTML = `${weatherInfo.description} | High: ${formatTemp(todayData.temp2m.max)} | Low: ${formatTemp(todayData.temp2m.min)}`;
 }
 
 // Update travel tip
@@ -348,22 +436,6 @@ function toggleTemperatureUnit() {
     localStorage.setItem('useCelsius', useCelsius);
 }
 
-// Populate city dropdown
-function populateCityDropdown() {
-    // Clear existing options first (except the placeholder)
-    while (citySelect.options.length > 1) {
-        citySelect.remove(1);
-    }
-    
-    // Add new options
-    EUROPEAN_CITIES.sort((a, b) => a.name.localeCompare(b.name)).forEach(city => {
-        const option = document.createElement('option');
-        option.value = city.name;
-        option.textContent = `${city.name}, ${city.country}`;
-        citySelect.appendChild(option);
-    });
-}
-
 // Load saved preferences
 function loadSavedPreferences() {
     // Load temperature unit preference
@@ -376,30 +448,23 @@ function loadSavedPreferences() {
     // Load last selected city
     const lastCity = localStorage.getItem('lastCity');
     if (lastCity) {
-        citySelect.value = lastCity;
+        // If using custom dropdown
+        const selectedCity = document.querySelector('.selected-city');
+        if (selectedCity) {
+            const city = EUROPEAN_CITIES.find(c => c.name === lastCity);
+            if (city) {
+                selectedCity.textContent = `${city.name}, ${city.country}`;
+            }
+        } else if (citySelect) {
+            // If using native select
+            citySelect.value = lastCity;
+        }
+        
         fetchWeather(lastCity);
     } else {
         // Default to Paris if no saved city
-        citySelect.value = 'Paris';
         fetchWeather('Paris');
     }
-}
-
-// Fix for Android select issue
-function fixAndroidSelect() {
-    // Use click instead of change for better mobile compatibility
-    citySelect.addEventListener('click', function() {
-        // Ensure the dropdown fully opens on Android
-        this.blur();
-        this.focus();
-    });
-    
-    // Also handle change event
-    citySelect.addEventListener('change', function() {
-        if (this.value && !isLoading) {
-            fetchWeather(this.value);
-        }
-    });
 }
 
 // Set up event listeners
@@ -409,20 +474,30 @@ function setupEventListeners() {
     
     // Popular city buttons with better mobile handling
     cityButtons.forEach(button => {
-        ['click', 'touchend'].forEach(eventType => {
-            button.addEventListener(eventType, (e) => {
-                if (eventType === 'touchend') {
-                    e.preventDefault(); // Prevent default for touch
+        button.addEventListener('click', () => {
+            if (isLoading) return;
+            
+            const city = button.getAttribute('data-city');
+            
+            // Update both custom and native dropdowns if they exist
+            const selectedCity = document.querySelector('.selected-city');
+            if (selectedCity) {
+                const cityData = EUROPEAN_CITIES.find(c => c.name === city);
+                if (cityData) {
+                    selectedCity.textContent = `${cityData.name}, ${cityData.country}`;
                 }
-                
-                if (isLoading) return;
-                
-                const city = button.getAttribute('data-city');
+            } else if (citySelect) {
                 citySelect.value = city;
-                fetchWeather(city);
-            });
+            }
+            
+            fetchWeather(city);
         });
     });
+}
+
+// Check if the device is a mobile device
+function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
 // Initialize application
@@ -430,10 +505,22 @@ function initApp() {
     // Create loading overlay
     getLoadingOverlay();
     
-    // Set up the app
-    populateCityDropdown();
-    fixAndroidSelect();
+    // For mobile devices, create custom dropdown
+    if (isMobileDevice()) {
+        createCustomCityDropdown();
+    } else if (citySelect) {
+        // For desktop, use native select with event listener
+        citySelect.addEventListener('change', () => {
+            if (citySelect.value && !isLoading) {
+                fetchWeather(citySelect.value);
+            }
+        });
+    }
+    
+    // Set up event listeners
     setupEventListeners();
+    
+    // Load saved preferences
     loadSavedPreferences();
 }
 
