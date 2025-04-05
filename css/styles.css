@@ -6,14 +6,12 @@
 }
 
 html, body {
-  /* Prevent pull-to-refresh behavior on mobile */
+  /* Better scroll behavior */
   overscroll-behavior: none;
-  /* Prevent elastic bounce effect on iOS */
+  /* Smooth scrolling on iOS */
   -webkit-overflow-scrolling: touch;
   /* Ensure proper height */
   height: 100%;
-  /* Prevent users from selecting text which can cause UI issues */
-  user-select: none;
 }
 
 :root {
@@ -37,7 +35,8 @@ body {
   min-height: 100vh;
   padding: 0;
   margin: 0;
-  position: fixed;
+  /* Allow normal scrolling */
+  position: relative;
   width: 100%;
   overflow-y: auto;
 }
