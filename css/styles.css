@@ -5,6 +5,17 @@
   box-sizing: border-box;
 }
 
+html, body {
+  /* Prevent pull-to-refresh behavior on mobile */
+  overscroll-behavior: none;
+  /* Prevent elastic bounce effect on iOS */
+  -webkit-overflow-scrolling: touch;
+  /* Ensure proper height */
+  height: 100%;
+  /* Prevent users from selecting text which can cause UI issues */
+  user-select: none;
+}
+
 :root {
   --primary-color: #e07a5f;
   --secondary-color: #f2cc8f;
@@ -26,12 +37,17 @@ body {
   min-height: 100vh;
   padding: 0;
   margin: 0;
+  position: fixed;
+  width: 100%;
+  overflow-y: auto;
 }
 
 .app-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
+  /* Prevent content from being cut off */
+  padding-bottom: 80px;
 }
 
 /* App Header */
@@ -76,6 +92,8 @@ body {
   box-shadow: var(--shadow);
   cursor: pointer;
   transition: all 0.3s ease;
+  /* Enable text selection for dropdown */
+  user-select: text;
 }
 
 #city-select:focus {
@@ -99,6 +117,9 @@ body {
   font-weight: 600;
   font-family: inherit;
   box-shadow: var(--shadow);
+  /* Make button larger on mobile for better touch targets */
+  min-width: 44px;
+  min-height: 44px;
 }
 
 #unit-toggle-btn:hover {
@@ -162,6 +183,28 @@ body {
   overflow-x: auto;
   padding-bottom: 10px;
   scroll-behavior: smooth;
+  /* Fix iOS momentum scrolling */
+  -webkit-overflow-scrolling: touch;
+  /* Prevent triggering unwanted refresh */
+  overscroll-behavior-x: contain;
+  /* Add padding to make space for scrollbar */
+  padding-right: 5px;
+  /* Show scrollbar differently based on platform */
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color) transparent;
+}
+
+.forecast-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.forecast-container::-webkit-scrollbar-thumb {
+  background-color: var(--primary-color);
+  border-radius: 10px;
+}
+
+.forecast-container::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .forecast-card {
@@ -177,6 +220,10 @@ body {
   gap: 8px;
   min-width: 140px;
   flex: 1;
+  /* Prevent card width issues */
+  flex-shrink: 0;
+  /* No grow beyond content */
+  flex-grow: 0;
 }
 
 .forecast-card:hover {
@@ -242,6 +289,9 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
+  /* Make buttons larger on mobile for better touch targets */
+  min-height: 44px;
+  min-width: 70px;
 }
 
 .city-btn:hover {
@@ -300,6 +350,10 @@ body {
     gap: 10px;
     align-items: flex-start;
   }
+  
+  .forecast-card {
+    min-width: 120px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -314,6 +368,15 @@ body {
   .weather-icon {
     font-size: 2rem;
     margin: 5px 0;
+  }
+  
+  /* Improve touch targets on mobile */
+  .city-btn {
+    padding: 12px 15px;
+  }
+  
+  #unit-toggle-btn {
+    padding: 12px 18px;
   }
 }
 
@@ -341,7 +404,7 @@ body {
 
 /* Loading overlay for city changes */
 .loading-overlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
