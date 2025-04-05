@@ -9,9 +9,19 @@
     --text-color: #333;
     --text-light: #666;
     --border-color: #e0e0e0;
-    --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     --border-radius: 12px;
     --transition: all 0.3s ease;
+    
+    /* Weather-specific colors */
+    --sunny-color: #ffb703;
+    --partly-cloudy-color: #ffb84d;
+    --cloudy-color: #adb5bd;
+    --foggy-color: #e9ecef;
+    --rain-color: #90e0ef;
+    --snow-color: #e7ecf2;
+    --snow-rain-color: #a2d2ff;
+    --thunder-color: #48cae4;
 }
 
 * {
@@ -106,6 +116,8 @@ h1 i {
     cursor: pointer;
     transition: var(--transition);
     font-weight: 500;
+    min-height: 44px;
+    min-width: 70px;
 }
 
 .city-btn:hover {
@@ -148,9 +160,12 @@ h1 i {
     display: flex;
     gap: 15px;
     overflow-x: auto;
-    padding: 10px 0;
+    padding-bottom: 10px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
 }
 
+/* Base forecast card */
 .forecast-card {
     background-color: var(--card-background);
     border-radius: var(--border-radius);
@@ -161,16 +176,80 @@ h1 i {
     animation: fadeIn 0.5s forwards;
     opacity: 0;
     flex-shrink: 0;
+    border-top: 5px solid var(--primary-color);
 }
 
 .forecast-card:hover {
     transform: translateY(-5px);
 }
 
+/* Weather-specific cards */
+.forecast-card.weather-sunny {
+    border-top-color: var(--sunny-color);
+    background-color: #fffdf7;
+}
+
+.forecast-card.weather-partly-cloudy {
+    border-top-color: var(--partly-cloudy-color);
+    background-color: #fffbf2;
+}
+
+.forecast-card.weather-cloudy {
+    border-top-color: var(--cloudy-color);
+    background-color: #f8f9fa;
+}
+
+.forecast-card.weather-foggy {
+    border-top-color: var(--foggy-color);
+    background-color: #f8f9fa;
+}
+
+.forecast-card.weather-rain {
+    border-top-color: var(--rain-color);
+    background-color: #f0f9ff;
+}
+
+.forecast-card.weather-snow {
+    border-top-color: var(--snow-color);
+    background-color: #f8f9fb;
+}
+
+.forecast-card.weather-snow-rain {
+    border-top-color: var(--snow-rain-color);
+    background-color: #f0f7ff;
+}
+
+.forecast-card.weather-thunder {
+    border-top-color: var(--thunder-color);
+    background-color: #e6f8fc;
+}
+
 .forecast-day {
-    font-weight: bold;
+    font-weight: 600;
     margin-bottom: 10px;
-    color: var(--primary-dark);
+}
+
+.forecast-card.weather-sunny .forecast-day,
+.forecast-card.weather-partly-cloudy .forecast-day {
+    color: var(--primary-color);
+}
+
+.forecast-card.weather-cloudy .forecast-day,
+.forecast-card.weather-foggy .forecast-day {
+    color: #6c757d;
+}
+
+.forecast-card.weather-rain .forecast-day {
+    color: #0077b6;
+}
+
+.forecast-card.weather-snow .forecast-day,
+.forecast-card.weather-snow-rain .forecast-day {
+    color: #457b9d;
+}
+
+.forecast-card.weather-thunder .forecast-day {
+    color: #0096c7;
 }
 
 .weather-icon {
@@ -192,7 +271,29 @@ h1 i {
 
 .temperature.high {
     font-weight: bold;
+}
+
+.forecast-card.weather-sunny .temperature.high,
+.forecast-card.weather-partly-cloudy .temperature.high {
     color: var(--primary-color);
+}
+
+.forecast-card.weather-cloudy .temperature.high,
+.forecast-card.weather-foggy .temperature.high {
+    color: #6c757d;
+}
+
+.forecast-card.weather-rain .temperature.high {
+    color: #0077b6;
+}
+
+.forecast-card.weather-snow .temperature.high,
+.forecast-card.weather-snow-rain .temperature.high {
+    color: #457b9d;
+}
+
+.forecast-card.weather-thunder .temperature.high {
+    color: #0096c7;
 }
 
 .temperature.low {
@@ -321,6 +422,34 @@ footer a:hover {
     
     .temperature {
         font-size: 0.85rem;
+    }
+    
+    /* Improve touch targets for mobile */
+    .city-btn {
+        padding: 12px 15px;
+    }
+    
+    .city-select {
+        height: 48px; /* Better touch target */
+    }
+    
+    /* Fix for Android select elements */
+    select:focus {
+        outline: none;
+    }
+}
+
+/* Better Android compatibility */
+@media (max-width: 480px) {
+    select.city-select {
+        font-size: 16px; /* Prevents zoom on focus in iOS */
+        -webkit-appearance: menulist; /* Force native appearance on mobile */
+        appearance: menulist;
+        background-image: none;
+    }
+    
+    .popular-cities {
+        justify-content: center;
     }
 }
 
